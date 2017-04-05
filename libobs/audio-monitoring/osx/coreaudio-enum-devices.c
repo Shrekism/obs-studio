@@ -125,6 +125,9 @@ static void get_default_id(char **p_id)
 		kAudioObjectPropertyElementMaster
 	};
 
+	if (*p_id)
+		return;
+
 	OSStatus      stat;
 	AudioDeviceID id = 0;
 	UInt32        size = sizeof(id);
