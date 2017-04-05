@@ -94,3 +94,55 @@ void obs_enum_audio_monitoring_devices(obs_enum_audio_device_cb cb, void *data)
 
 	free(ids);
 }
+
+static void alloc_default_id(void *data, const char *name, const char *id)
+{
+	char **p_id = data;
+	UNUSED_PARAMETER(name);
+
+	*p_id = bstrdup(id);
+}
+
+static void get_default_id(char **p_id)
+{
+	AudioObjectPropertyAddress addr = {
+		kAudioHardwarePropertyDefaultSystemOutputDevice,
+		kAudioObjectPropertyScopeGlobal,
+		kAudioObjectPropertyElementMaster
+	};
+
+	OSStatus      stat;
+	AudioDeviceID id;
+	UInt32        size = sizeof(id);
+
+	stat = AudioObjectGetPropertyData(kAudioObjectSystemObject, &addr, 0,
+			NULL, &size, id);
+	if (success(stat, "AudioObjectGetPropertyData"))
+		obs_enum_audio_monitoring_device(alloc_default_id, p_id, id);
+
+	if (!*p_id)
+		*p_id = bzalloc(1);
+}
+
+bool devices_match(const char *id1, const char *id2)
+{
+	char *default_id = NULL;
+	bool match;
+
+	if (!id1 || !id2)
+		return false;
+
+	if (strcmp(id1, "default") == 0) {
+		get_default_id(&default_id);
+		id1 = default_id;
+	}
+	if (strcmp(id2, "default") == 0) {
+		get_default_id(&default_id);
+		id2 = default_id;
+	}
+
+	match = strcmp(id1, id2) == 0;
+	bfree(default_id);
+
+	return match;
+}
