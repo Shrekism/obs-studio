@@ -64,7 +64,7 @@ fail:
 		CFRelease(cf_uid);
 }
 
-void obs_enum_audio_monitoring_devices(obs_enum_audio_device_cb cb, void *data)
+bool obs_enum_audio_monitoring_devices(obs_enum_audio_device_cb cb, void *data)
 {
 	AudioObjectPropertyAddress addr = {
 		kAudioHardwarePropertyDevices,
@@ -80,7 +80,7 @@ void obs_enum_audio_monitoring_devices(obs_enum_audio_device_cb cb, void *data)
 	stat = AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &addr,
 						0, NULL, &size);
 	if (!success(stat, "get data size"))
-		return;
+		return true;
 
 	ids   = malloc(size);
 	count = size / sizeof(AudioDeviceID);
@@ -93,6 +93,7 @@ void obs_enum_audio_monitoring_devices(obs_enum_audio_device_cb cb, void *data)
 	}
 
 	free(ids);
+	return true;
 }
 
 static void alloc_default_id(void *data, const char *name, const char *id)
@@ -112,14 +113,13 @@ static void get_default_id(char **p_id)
 	};
 
 	OSStatus      stat;
-	AudioDeviceID id;
+	AudioDeviceID id = 0;
 	UInt32        size = sizeof(id);
 
 	stat = AudioObjectGetPropertyData(kAudioObjectSystemObject, &addr, 0,
-			NULL, &size, id);
+			NULL, &size, &id);
 	if (success(stat, "AudioObjectGetPropertyData"))
 		obs_enum_audio_monitoring_device(alloc_default_id, p_id, id);
-
 	if (!*p_id)
 		*p_id = bzalloc(1);
 }
