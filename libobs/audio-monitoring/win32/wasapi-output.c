@@ -252,12 +252,12 @@ static bool audio_monitor_init(struct audio_monitor *monitor,
 
 	pthread_mutex_init_value(&monitor->playback_mutex);
 
+	monitor->source = source;
+
 	const char *id = obs->audio.monitoring_device_id;
 	if (!id) {
 		return false;
 	}
-
-	monitor->source = source;
 
 	if (source->info.output_flags & OBS_SOURCE_DO_NOT_SELF_MONITOR) {
 		obs_data_t *s = obs_source_get_settings(source);

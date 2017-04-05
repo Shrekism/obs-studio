@@ -160,6 +160,8 @@ static bool audio_monitor_init(struct audio_monitor *monitor,
 		.mBitsPerChannel = sizeof(float) * 8
 	};
 
+	monitor->source = source;
+
 	monitor->channels = channels;
 	monitor->buffer_size =
 		channels * sizeof(float) * info->samples_per_sec / 100 * 3;
@@ -171,8 +173,6 @@ static bool audio_monitor_init(struct audio_monitor *monitor,
 	if (!uid || !*uid) {
 		return false;
 	}
-
-	monitor->source = source;
 
 	if (source->info.output_flags & OBS_SOURCE_DO_NOT_SELF_MONITOR) {
 		obs_data_t *s = obs_source_get_settings(source);
