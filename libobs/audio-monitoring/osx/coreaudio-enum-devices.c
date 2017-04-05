@@ -95,15 +95,16 @@ void obs_enum_audio_monitoring_devices(obs_enum_audio_device_cb cb, void *data)
 	free(ids);
 }
 
-static void alloc_default_id(void *data, const char *name, const char *id)
+static bool alloc_default_id(void *data, const char *name, const char *id)
 {
 	char **p_id = data;
 	UNUSED_PARAMETER(name);
 
 	*p_id = bstrdup(id);
+	return false;
 }
 
-static bool get_default_id(char **p_id)
+static void get_default_id(char **p_id)
 {
 	AudioObjectPropertyAddress addr = {
 		kAudioHardwarePropertyDefaultSystemOutputDevice,
@@ -121,7 +122,6 @@ static bool get_default_id(char **p_id)
 		obs_enum_audio_monitoring_device(alloc_default_id, p_id, id);
 	if (!*p_id)
 		*p_id = bzalloc(1);
-	return false;
 }
 
 bool devices_match(const char *id1, const char *id2)
